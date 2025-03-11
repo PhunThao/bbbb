@@ -11,49 +11,76 @@ const links = [
         "https://archive.org/details/the-pillow-book/page/n4/mode/1up",
 ];
 
-function createX() {
-    const x = document.createElement("div");
-    x.textContent = "❌";
-    x.classList.add("x-symbol");
-    document.body.appendChild(x);
-    
-    let xPos = Math.random() * window.innerWidth;
-    let yPos = Math.random() * window.innerHeight;
-    let speedX = (Math.random() - 0.5) * 4;
-    let speedY = (Math.random() - 0.5) * 4;
-    
-    x.style.left = `${xPos}px`;
-    x.style.top = `${yPos}px`;
-    
-    function move() {
-        xPos += speedX;
-        yPos += speedY;
-        
-        if (xPos <= 0 || xPos >= window.innerWidth - 50) speedX *= -1;
-        if (yPos <= 0 || yPos >= window.innerHeight - 50) speedY *= -1;
-        
-        x.style.left = `${xPos}px`;
-        x.style.top = `${yPos}px`;
-        
-        requestAnimationFrame(move);
-    }
-    move();
+// Số lượng dấu ❌ muốn tạo (ví dụ 20)
+const TOTAL_X = 100;
 
-    x.addEventListener("click", () => {
-        if (Math.random() < 0.5) {
-            openRandomLinks(3);
-        }
-        x.remove();
-    });
+// Hàm tạo một dấu ❌ rơi từ trên xuống
+function createFallingX() {
+  // Tạo phần tử dấu ❌
+  const xElement = document.createElement("div");
+  xElement.textContent = "❌";
+  xElement.classList.add("x-symbol");
+
+  // Vị trí ngẫu nhiên theo chiều ngang
+  let xPos = Math.random() * window.innerWidth;
+  // Bắt đầu từ phía trên màn hình (có thể đặt -50 để ẩn trước khi rơi vào màn hình)
+  let yPos = -50;
+
+  // Tốc độ rơi (pixel mỗi khung hình)
+  let fallSpeed = 2 + Math.random() * 3; // 2 -> 5
+  // Tốc độ di chuyển ngang (có thể = 0 nếu chỉ muốn rơi thẳng)
+  let horizontalSpeed = (Math.random() - 0.5) * 2; // -1 -> 1
+
+  // Đặt vị trí ban đầu
+  xElement.style.left = `${xPos}px`;
+  xElement.style.top = `${yPos}px`;
+
+  // Thêm vào body
+  document.body.appendChild(xElement);
+
+  // Mỗi lần animation frame, cập nhật vị trí
+  function fall() {
+    yPos += fallSpeed;
+    xPos += horizontalSpeed;
+
+    // Nếu chạm biên ngang, đổi hướng
+    if (xPos < 0 || xPos > window.innerWidth - 40) {
+      horizontalSpeed *= -1;
+    }
+
+    // Cập nhật style
+    xElement.style.left = `${xPos}px`;
+    xElement.style.top = `${yPos}px`;
+
+    // Nếu rơi quá khỏi màn hình, xóa dấu ❌
+    if (yPos > window.innerHeight) {
+      xElement.remove();
+      return;
+    }
+
+    // Tiếp tục requestAnimationFrame
+    requestAnimationFrame(fall);
+  }
+  // Gọi hàm rơi
+  fall();
+
+  // Sự kiện click vào dấu ❌
+  xElement.addEventListener("click", () => {
+    openRandomLinks(3); // Luôn luôn mở 3 link
+    xElement.remove();  // Xóa dấu ❌ sau khi click
+  });
 }
 
+// Hàm mở 3 link ngẫu nhiên
 function openRandomLinks(count) {
-    const shuffledLinks = links.sort(() => 0.5 - Math.random());
-    for (let i = 0; i < count; i++) {
-        window.open(shuffledLinks[i], "_blank");
-    }
+  // Copy mảng link và xáo trộn
+  const shuffledLinks = [...links].sort(() => Math.random() - 0.5);
+  for (let i = 0; i < count; i++) {
+    window.open(shuffledLinks[i], "_blank");
+  }
 }
 
-for (let i = 0; i < 5; i++) {
-    createX();
+// Tạo nhiều dấu ❌ rơi
+for (let i = 0; i < TOTAL_X; i++) {
+  createFallingX();
 }
